@@ -1,0 +1,28 @@
+node_modules
+npm-debug.log
+
+# Build
+dist
+build
+
+# Environment
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Testes
+coverage
+.nyc_output
+
+# OS
+.DS_Store
+Thumbs.db

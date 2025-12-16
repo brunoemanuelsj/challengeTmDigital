@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # POSTGIS - Banco de dados
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: nestjs-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nestjs_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+      # Monta o script SQL para rodar na inicialização
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# VOLUMES
+volumes:
+  postgis-data:
+    driver: local
