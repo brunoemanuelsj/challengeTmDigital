@@ -23,7 +23,7 @@
 
   <form [formGroup]="propriedadeForm" class="mt-2">
     <!-- Seção: Dados da Propriedade -->
-    <div class="mb-4">
+    <div style="margin-bottom: 8px">
       <h3 class="section-title">
         <i class="pi pi-home"></i>
         Dados da Propriedade
@@ -46,17 +46,21 @@
         </div>
 
         <div class="field col-6">
-          <label for="lead_id" class="required">Lead ID</label>
-          <input
-            pInputText
+          <label for="lead_id" class="required">Lead Proprietário</label>
+          <select
             id="lead_id"
             formControlName="lead_id"
-            placeholder="ID do lead"
+            class="form-select"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('lead_id') }"
-          />
+          >
+            <option value="">Selecione um lead</option>
+            @for (lead of leads(); track lead.id) {
+            <option [value]="lead.id">{{ lead.nome }} - {{ lead.cpf }}</option>
+            }
+          </select>
           <div class="error-message" *ngIf="isFieldInvalid('lead_id')">
             <i class="pi pi-exclamation-circle"></i>
-            <span>Lead ID é obrigatório</span>
+            <span>Lead é obrigatório</span>
           </div>
         </div>
 
@@ -108,20 +112,93 @@
             }
           </select>
         </div>
+      </div>
+    </div>
 
-        <div class="field col-12">
-          <label for="geometria_wkt">Geometria (WKT)</label>
-          <textarea
-            id="geometria_wkt"
-            formControlName="geometria_wkt"
-            placeholder="Ex: POLYGON((-47.8 -21.2, -47.8 -21.1, -47.7 -21.1, -47.7 -21.2, -47.8 -21.2))"
-            rows="3"
-            class="form-textarea"
-          ></textarea>
+    <!-- Seção: Delimitação da Propriedade -->
+    <div style="margin-bottom: 8px">
+      <h3 class="section-title">
+        <i class="pi pi-map"></i>
+        Delimitação da Propriedade (Polígono)
+      </h3>
+
+      <div class="polygon-container">
+        <div class="add-vertice-section">
+          <div class="vertice-inputs">
+            <div class="field">
+              <label for="new-latitude">Latitude</label>
+              <p-inputNumber
+                inputId="new-latitude"
+                [(ngModel)]="newVertice.latitude"
+                [ngModelOptions]="{ standalone: true }"
+                mode="decimal"
+                [minFractionDigits]="6"
+                [maxFractionDigits]="6"
+                [min]="-90"
+                [max]="90"
+                placeholder="Ex: -21.179474"
+                styleClass="w-full"
+              ></p-inputNumber>
+            </div>
+
+            <div class="field">
+              <label for="new-longitude">Longitude</label>
+              <p-inputNumber
+                inputId="new-longitude"
+                [(ngModel)]="newVertice.longitude"
+                [ngModelOptions]="{ standalone: true }"
+                mode="decimal"
+                [minFractionDigits]="6"
+                [maxFractionDigits]="6"
+                [min]="-180"
+                [max]="180"
+                placeholder="Ex: -47.829872"
+                styleClass="w-full"
+              ></p-inputNumber>
+            </div>
+
+            <div class="field">
+              <label>&nbsp;</label>
+              <p-button
+                label="Adicionar Vértice"
+                icon="pi pi-plus"
+                [outlined]="true"
+                (onClick)="addVertice()"
+                [disabled]="!canAddVertice()"
+              ></p-button>
+            </div>
+          </div>
+
           <small class="geometria-hint">
             <i class="pi pi-info-circle"></i>
-            Opcional: Insira a geometria no formato WKT (Well-Known Text)
+            Adicione no mínimo 3 vértices para formar o contorno da propriedade. Adicione os pontos
+            em ordem para formar o perímetro.
           </small>
+        </div>
+
+        <div class="vertices-list" *ngIf="vertices().length > 0">
+          <h4 class="vertices-title">Vértices do Polígono ({{ vertices().length }})</h4>
+          <div class="vertices-grid">
+            @for (vertice of vertices(); track $index) {
+            <div class="vertice-item">
+              <span class="vertice-number">{{ $index + 1 }}</span>
+              <div class="vertice-coords">
+                <span class="coord-label">Lat:</span>
+                <span class="coord-value">{{ vertice.latitude }}</span>
+                <span class="coord-label">Long:</span>
+                <span class="coord-value">{{ vertice.longitude }}</span>
+              </div>
+              <button
+                type="button"
+                class="remove-vertice-btn"
+                (click)="removeVertice($index)"
+                pTooltip="Remover vértice"
+              >
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+            }
+          </div>
         </div>
       </div>
     </div>

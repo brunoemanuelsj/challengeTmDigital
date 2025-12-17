@@ -1,12 +1,12 @@
 :host ::ng-deep .custom-modal .p-dialog-header {
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: white;
+  border-bottom: 2px solid #e2e8f0;
   border-radius: 12px 12px 0 0;
 }
 
 :host ::ng-deep .custom-modal .p-dialog-header .p-dialog-title {
-  color: white;
+  color: #334155;
 }
 
 :host ::ng-deep .custom-modal .p-dialog-content {
@@ -105,6 +105,11 @@ label.required::after {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+.form-select.ng-invalid.ng-dirty,
+.form-textarea.ng-invalid.ng-dirty {
+  border-color: #ef4444;
+}
+
 .form-textarea {
   resize: vertical;
   font-family: 'Roboto', sans-serif;
@@ -133,6 +138,116 @@ label.required::after {
   color: #667eea;
 }
 
+/* Polygon Section */
+.polygon-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.add-vertice-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vertice-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.vertices-list {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.vertices-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vertices-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vertice-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: box-shadow 0.2s;
+}
+
+.vertice-item:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.vertice-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.vertice-coords {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.coord-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.coord-value {
+  color: #334155;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.remove-vertice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #fee;
+  color: #ef4444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.remove-vertice-btn:hover {
+  background: #fecaca;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -151,6 +266,14 @@ label.required::after {
   .col-6,
   .col-12 {
     grid-column: span 1;
+  }
+
+  .vertice-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .vertice-coords {
+    flex-wrap: wrap;
   }
 
   :host ::ng-deep .custom-modal {
