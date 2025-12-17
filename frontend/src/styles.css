@@ -1,5 +1,74 @@
-@import 'primeng/resources/themes/lara-light-indigo/theme.css';
-@import 'primeng/resources/primeng.min.css';
-@import 'primeicons/primeicons.css';
+/* styles/reset.css */
 
-/* You can add global styles to this file, and also import other style files */
+/* 1. Box sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove margins padrões */
+* {
+  margin: 0;
+}
+
+/* 3. Altura base */
+html,
+body {
+  height: 100%;
+}
+
+/* 4. Melhor renderização de texto */
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 5. Mídia responsiva por padrão */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 6. Reset de formulários */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 7. Evita overflow inesperado em textos */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* 8. Remove estilos padrão de listas */
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+/* 9. Links sem decoração padrão */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 10. Root para apps SPA */
+#root,
+app-root {
+  isolation: isolate;
+}
