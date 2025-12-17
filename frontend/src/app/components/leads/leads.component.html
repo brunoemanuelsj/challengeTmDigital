@@ -1,14 +1,135 @@
-<div class="leads">
-  <h3>Leads</h3>
-  <p-button
-    label="Listar Lead"
-    styleClass="p-button-raised p-button-primary"
-    [loading]="isLoading()"
-    (onClick)="loadLead()"
-  ></p-button>
-
-  <div *ngIf="lead()" class="lead-result">
-    <h4>Lead encontrado:</h4>
-    <pre>{{ lead() | json }}</pre>
+<div class="card">
+  <div class="toolbar-container">
+    <h2 class="page-title">Gerenciamento de Leads</h2>
+    <p-button label="Novo Lead" icon="pi pi-plus" (onClick)="onAdd()"></p-button>
   </div>
+
+  <p-table
+    #dt
+    [value]="leads()"
+    [rows]="5"
+    [paginator]="true"
+    [globalFilterFields]="[
+      'nome',
+      'cpf',
+      'email',
+      'telefone',
+      'status',
+      'comentarios',
+      'total_area'
+    ]"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} leads"
+    [showCurrentPageReport]="true"
+    responsiveLayout="stack"
+    [breakpoint]="'960px'"
+    styleClass="p-datatable-sm"
+    [loading]="loading()"
+  >
+    <ng-template pTemplate="caption">
+      <div class="table-header">
+        <div class="search-box">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="Pesquisar..."
+          />
+        </div>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="nome" style="width: 20%">
+          Nome <p-sortIcon field="nome"></p-sortIcon>
+        </th>
+        <th pSortableColumn="cpf" style="width: 15%">CPF <p-sortIcon field="cpf"></p-sortIcon></th>
+        <th pSortableColumn="email" style="width: 20%">
+          Email <p-sortIcon field="email"></p-sortIcon>
+        </th>
+        <th pSortableColumn="telefone" style="width: 15%">
+          Telefone <p-sortIcon field="telefone"></p-sortIcon>
+        </th>
+        <th pSortableColumn="total_area" style="width: 15%">
+          Área Total (ha) <p-sortIcon field="total_area"></p-sortIcon>
+        </th>
+        <th pSortableColumn="status" style="width: 10%">
+          Status <p-sortIcon field="status"></p-sortIcon>
+        </th>
+        <th pSortableColumn="comentarios" style="width: 20%">
+          Comentários <p-sortIcon field="comentarios"></p-sortIcon>
+        </th>
+        <th style="width: 10%">Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-lead>
+      <tr>
+        <td>
+          <span class="p-column-title">Nome</span>
+          <span class="cell-content">{{ lead.nome }}</span>
+        </td>
+        <td>
+          <span class="p-column-title">CPF</span>
+          <span class="cell-content">{{ lead.cpf }}</span>
+        </td>
+        <td>
+          <span class="p-column-title">Email</span>
+          <span class="cell-content">{{ lead.email }}</span>
+        </td>
+        <td>
+          <span class="p-column-title">Telefone</span>
+          <span class="cell-content">{{ lead.telefone }}</span>
+        </td>
+        <td>
+          <span class="p-column-title">Área Total</span>
+          <span class="cell-content">{{ lead.total_area | number : '1.0-2' }} ha</span>
+        </td>
+        <td>
+          <span class="p-column-title">Status</span>
+          <p-tag
+            [value]="lead.status"
+            [severity]="getSeverity(lead.status)"
+            [rounded]="true"
+          ></p-tag>
+        </td>
+        <td>
+          <span class="p-column-title">Comentários</span>
+          <span class="cell-content">{{ lead.comentarios }}</span>
+        </td>
+        <td>
+          <span class="p-column-title">Ações</span>
+          <div class="actions-cell">
+            <p-button
+              icon="pi pi-pencil"
+              pTooltip="Editar"
+              tooltipPosition="top"
+              [rounded]="true"
+              [outlined]="true"
+              severity="info"
+              (onClick)="onEdit(lead)"
+            ></p-button>
+            <p-button
+              icon="pi pi-trash"
+              pTooltip="Excluir"
+              tooltipPosition="top"
+              [rounded]="true"
+              [outlined]="true"
+              severity="danger"
+              (onClick)="onDelete(lead)"
+            ></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8" class="text-center p-4">Nenhum lead encontrado.</td>
+      </tr>
+    </ng-template>
+  </p-table>
 </div>
+
+<app-new-lead-modal [(visible)]="showNewLeadModal" (onSave)="onSaveLead($event)">
+</app-new-lead-modal>

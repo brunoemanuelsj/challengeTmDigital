@@ -1,0 +1,159 @@
+<p-dialog
+  header="Novo Lead"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '96vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="close()"
+>
+  <form [formGroup]="leadForm">
+    <div class="field-group">
+      <h3>Dados do Lead</h3>
+      <div class="form-grid">
+        <div class="field col-6">
+          <label for="nome">Nome</label>
+          <input pInputText id="nome" formControlName="nome" />
+          <small
+            class="p-error"
+            *ngIf="leadForm.get('nome')?.invalid && leadForm.get('nome')?.touched"
+            >Nome é obrigatório.</small
+          >
+        </div>
+        <div class="field col-6">
+          <label for="cpf">CPF</label>
+          <input pInputText id="cpf" formControlName="cpf" />
+          <small
+            class="p-error"
+            *ngIf="leadForm.get('cpf')?.invalid && leadForm.get('cpf')?.touched"
+            >CPF é obrigatório.</small
+          >
+        </div>
+        <div class="field col-6">
+          <label for="email">Email</label>
+          <input pInputText id="email" formControlName="email" />
+          <small
+            class="p-error"
+            *ngIf="leadForm.get('email')?.invalid && leadForm.get('email')?.touched"
+            >Email inválido.</small
+          >
+        </div>
+        <div class="field col-6">
+          <label for="telefone">Telefone</label>
+          <input pInputText id="telefone" formControlName="telefone" />
+          <small
+            class="p-error"
+            *ngIf="leadForm.get('telefone')?.invalid && leadForm.get('telefone')?.touched"
+            >Telefone é obrigatório.</small
+          >
+        </div>
+        <div class="field col-6">
+          <label for="status">Status</label>
+          <input pInputText id="status" formControlName="status" />
+        </div>
+        <div class="field col-12">
+          <label for="comentarios">Comentários</label>
+          <textarea
+            pTextarea
+            id="comentarios"
+            formControlName="comentarios"
+            rows="3"
+            style="width: 100%"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="section-header">
+        <h3>Propriedades Rurais</h3>
+        <p-button
+          label="Adicionar Propriedade"
+          icon="pi pi-plus"
+          styleClass="p-button-sm p-button-outlined"
+          (onClick)="addProperty()"
+        ></p-button>
+      </div>
+
+      <div formArrayName="propriedades">
+        <div
+          *ngFor="let prop of propriedades.controls; let i = index"
+          [formGroupName]="i"
+          class="property-card"
+        >
+          <div class="property-header">
+            <h4>Propriedade {{ i + 1 }}</h4>
+            <p-button
+              icon="pi pi-trash"
+              styleClass="p-button-danger p-button-text p-button-sm"
+              (onClick)="removeProperty(i)"
+              *ngIf="propriedades.length > 0"
+            ></p-button>
+          </div>
+
+          <div class="form-grid">
+            <div class="field col-6">
+              <label [for]="'prop_nome_' + i">Nome da Propriedade</label>
+              <input pInputText [id]="'prop_nome_' + i" formControlName="nome" />
+              <small class="p-error" *ngIf="prop.get('nome')?.invalid && prop.get('nome')?.touched"
+                >Nome é obrigatório.</small
+              >
+            </div>
+            <div class="field col-6">
+              <label [for]="'prop_cultura_' + i">Cultura</label>
+              <input pInputText [id]="'prop_cultura_' + i" formControlName="cultura" />
+              <small
+                class="p-error"
+                *ngIf="prop.get('cultura')?.invalid && prop.get('cultura')?.touched"
+                >Cultura é obrigatória.</small
+              >
+            </div>
+            <div class="field col-4">
+              <label [for]="'prop_area_' + i">Área (Hectares)</label>
+              <p-inputNumber
+                [id]="'prop_area_' + i"
+                formControlName="area_hectares"
+                mode="decimal"
+                [minFractionDigits]="2"
+                styleClass="w-full"
+              ></p-inputNumber>
+              <small
+                class="p-error"
+                *ngIf="prop.get('area_hectares')?.invalid && prop.get('area_hectares')?.touched"
+                >Área é obrigatória.</small
+              >
+            </div>
+            <div class="field col-4">
+              <label [for]="'prop_municipio_' + i">Município</label>
+              <input pInputText [id]="'prop_municipio_' + i" formControlName="municipio" />
+              <small
+                class="p-error"
+                *ngIf="prop.get('municipio')?.invalid && prop.get('municipio')?.touched"
+                >Município é obrigatório.</small
+              >
+            </div>
+            <div class="field col-4">
+              <label [for]="'prop_estado_' + i">Estado</label>
+              <input pInputText [id]="'prop_estado_' + i" formControlName="estado" />
+              <small
+                class="p-error"
+                *ngIf="prop.get('estado')?.invalid && prop.get('estado')?.touched"
+                >Estado é obrigatório.</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      styleClass="p-button-text"
+      (onClick)="close()"
+    ></p-button>
+    <p-button label="Salvar" icon="pi pi-check" (onClick)="save()"></p-button>
+  </ng-template>
+</p-dialog>

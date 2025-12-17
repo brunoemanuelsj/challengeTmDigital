@@ -1,12 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
-import { LeadsService } from './leads.service';
+import { Controller, Get } from "@nestjs/common";
+import { LeadsService } from "./leads.service";
 
-@Controller('leads')
+@Controller("leads")
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
-  @Get('one')
-  async getOne() {
-    return this.leadsService.findOne();
+  @Get()
+  async getAll() {
+    return await this.leadsService.findAll();
   }
 }

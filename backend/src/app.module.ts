@@ -18,13 +18,13 @@ import { LeadsModule } from "./leads/leads.module";
       useFactory: (configService: ConfigService) => ({
         type: "postgres", // Tipo do banco
         host: configService.get("DB_HOST", "localhost"),
-        port: parseInt(configService.get("DB_PORT", "5432")),
+        port: Number(configService.get("DB_PORT", "5432")),
         username: configService.get("DB_USER", "postgres"),
         password: configService.get("DB_PASSWORD", "postgres"),
         database: configService.get("DB_NAME", "nestjs_db"),
 
         // Busca todas as entities automaticamente
-        entities: [__dirname + "/**/*.entity{.ts,.js}"],
+        entities: [`${__dirname}/**/*.entity{.ts,.js}`],
 
         synchronize: false,
         migrationsRun: false,
