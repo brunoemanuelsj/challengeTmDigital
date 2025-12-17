@@ -72,4 +72,31 @@ export class LeadsService {
       await queryRunner.release();
     }
   }
+
+  async delete(id: string): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Deletar propriedades rurais associadas primeiro
+      await queryRunner.query(
+        `DELETE FROM propriedades_rurais WHERE lead_id = $1`,
+        [id]
+      );
+
+      // Deletar o lead
+      const result = await queryRunner.query(
+        `DELETE FROM leads WHERE id = $1`,
+        [id]
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

@@ -8,7 +8,8 @@ import { TableModule } from "primeng/table";
 import { TagModule } from "primeng/tag";
 import { ToolbarModule } from "primeng/toolbar";
 import { TooltipModule } from "primeng/tooltip";
-import { MessageService } from "primeng/api";
+import { ConfirmationService, MessageService } from "primeng/api";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
 import type { Lead } from "../../models";
 import { LeadsService } from "../../services/leads.service";
 import { NewLeadModalComponent } from "./new-lead-modal/new-lead-modal.component";
@@ -27,6 +28,7 @@ import { NewLeadModalComponent } from "./new-lead-modal/new-lead-modal.component
     InputIconModule,
     TooltipModule,
     NewLeadModalComponent,
+    ConfirmDialogModule,
   ],
   templateUrl: "./leads.component.html",
   styleUrls: ["./leads.component.css"],
@@ -36,7 +38,8 @@ export class LeadsComponent implements OnInit {
 
   constructor(
     private leadsService: LeadsService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) {}
 
   loading = signal<boolean>(true);
@@ -124,7 +127,37 @@ export class LeadsComponent implements OnInit {
     console.log("Editar lead", lead);
   }
 
-  onDelete(lead: any) {
-    console.log("Excluir lead", lead);
+  onDelete(lead: Lead) {
+    this.confirmationService.confirm({
+      message: `Tem certeza que deseja excluir o lead <strong>${lead.nome}</strong>?<br/><br/>⚠️ Todas as propriedades rurais associadas a este lead também serão excluídas.`,
+      header: "Confirmar Exclusão",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sim, excluir",
+      rejectLabel: "Cancelar",
+      acceptButtonStyleClass: "p-button-danger",
+      rejectButtonStyleClass: "p-button-outlined",
+      accept: () => {
+        this.leadsService.deleteLead(lead.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: "success",
+              summary: "Sucesso",
+              detail: "Lead excluído com sucesso!",
+              life: 3000,
+            });
+            this.loadLeads();
+          },
+          error: (error) => {
+            console.error("Erro ao excluir lead:", error);
+            this.messageService.add({
+              severity: "error",
+              summary: "Erro",
+              detail: error.error?.message || "Erro ao excluir lead. Tente novamente.",
+              life: 5000,
+            });
+          },
+        });
+      },
+    });
   }
 }

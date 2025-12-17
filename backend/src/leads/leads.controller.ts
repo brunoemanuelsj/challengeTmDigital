@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { CreateLeadDto } from "./dto/create-lead.dto";
 import { LeadsService } from "./leads.service";
 
@@ -14,5 +14,10 @@ export class LeadsController {
   @Post()
   async create(@Body() createLeadDto: CreateLeadDto) {
     return await this.leadsService.create(createLeadDto);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string) {
+    return await this.leadsService.delete(id);
   }
 }
