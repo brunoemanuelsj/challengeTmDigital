@@ -1,4 +1,14 @@
 <div class="leads">
-	<h3>Leads</h3>
-	<button pButton type="button" label="Novo Lead" class="p-button-raised p-button-primary"></button>
+  <h3>Leads</h3>
+  <p-button
+    label="Listar Lead"
+    styleClass="p-button-raised p-button-primary"
+    [loading]="isLoading()"
+    (onClick)="loadLead()"
+  ></p-button>
+
+  <div *ngIf="lead()" class="lead-result">
+    <h4>Lead encontrado:</h4>
+    <pre>{{ lead() | json }}</pre>
+  </div>
 </div>

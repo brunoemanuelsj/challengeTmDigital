@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { LeadsModule } from "./leads/leads.module";
 
 @Module({
   imports: [
@@ -25,15 +26,16 @@ import { AppService } from "./app.service";
         // Busca todas as entities automaticamente
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
 
-        // CUIDADO: synchronize cria/atualiza tabelas automaticamente
-        // Em produção, use migrations!
-        synchronize: configService.get("NODE_ENV") !== "production",
+        synchronize: false,
+        migrationsRun: false,
+        dropSchema: false,
 
         // Mostra queries SQL no console (útil para debug)
         logging: configService.get("NODE_ENV") === "development",
       }),
       inject: [ConfigService],
     }),
+    LeadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
