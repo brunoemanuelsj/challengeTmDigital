@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit, signal } from "@angular/core";
+import { Component, OnInit, signal, ViewChild } from "@angular/core";
 import { ButtonModule } from "primeng/button";
 import { IconFieldModule } from "primeng/iconfield";
 import { InputIconModule } from "primeng/inputicon";
@@ -8,6 +8,7 @@ import { TableModule } from "primeng/table";
 import { TagModule } from "primeng/tag";
 import { ToolbarModule } from "primeng/toolbar";
 import { TooltipModule } from "primeng/tooltip";
+import { MessageService } from "primeng/api";
 import type { Lead } from "../../models";
 import { LeadsService } from "../../services/leads.service";
 import { NewLeadModalComponent } from "./new-lead-modal/new-lead-modal.component";
@@ -31,7 +32,12 @@ import { NewLeadModalComponent } from "./new-lead-modal/new-lead-modal.component
   styleUrls: ["./leads.component.css"],
 })
 export class LeadsComponent implements OnInit {
-  constructor(private leadsService: LeadsService) {}
+  @ViewChild(NewLeadModalComponent) modal?: NewLeadModalComponent;
+
+  constructor(
+    private leadsService: LeadsService,
+    private messageService: MessageService
+  ) {}
 
   loading = signal<boolean>(true);
 
@@ -90,8 +96,28 @@ export class LeadsComponent implements OnInit {
   }
 
   onSaveLead(leadData: any) {
-    console.log("Novo lead para salvar:", leadData);
-    // Aqui será implementada a lógica de salvar posteriormente
+    this.leadsService.createLead(leadData).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: "success",
+          summary: "Sucesso",
+          detail: "Lead criado com sucesso!",
+          life: 3000,
+        });
+        this.modal?.close();
+        this.loadLeads();
+      },
+      error: (error) => {
+        console.error("Erro ao criar lead:", error);
+        this.messageService.add({
+          severity: "error",
+          summary: "Erro",
+          detail: error.error?.message || "Erro ao criar lead. Tente novamente.",
+          life: 5000,
+        });
+        this.modal?.resetLoading();
+      },
+    });
   }
 
   onEdit(lead: any) {

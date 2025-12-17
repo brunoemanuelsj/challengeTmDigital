@@ -22,4 +22,8 @@ export class LeadsService {
       )
     );
   }
+
+  createLead(leadData: any): Observable<Lead> {
+    return this.http.post<Lead>(`${this.apiUrl}/leads`, leadData);
+  }
 }

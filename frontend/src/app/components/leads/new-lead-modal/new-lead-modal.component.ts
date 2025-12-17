@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output, signal } from "@angular/core";
 import {
   FormArray,
   FormBuilder,
@@ -12,6 +12,7 @@ import { DialogModule } from "primeng/dialog";
 import { InputNumberModule } from "primeng/inputnumber";
 import { InputTextModule } from "primeng/inputtext";
 import { TextareaModule } from "primeng/textarea";
+import { TooltipModule } from "primeng/tooltip";
 
 @Component({
   selector: "app-new-lead-modal",
@@ -24,6 +25,7 @@ import { TextareaModule } from "primeng/textarea";
     InputTextModule,
     TextareaModule,
     InputNumberModule,
+    TooltipModule,
   ],
   templateUrl: "./new-lead-modal.component.html",
   styleUrls: ["./new-lead-modal.component.css"],
@@ -33,9 +35,14 @@ export class NewLeadModalComponent {
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() onSave = new EventEmitter<any>();
 
-  leadForm: FormGroup;
+  leadForm!: FormGroup;
+  loading = signal<boolean>(false);
 
   constructor(private fb: FormBuilder) {
+    this.initForm();
+  }
+
+  private initForm() {
     this.leadForm = this.fb.group({
       nome: ["", Validators.required],
       cpf: ["", Validators.required],
@@ -69,17 +76,44 @@ export class NewLeadModalComponent {
   close() {
     this.visible = false;
     this.visibleChange.emit(this.visible);
+    this.resetForm();
+  }
+
+  resetForm() {
     this.leadForm.reset({ status: "novo" });
     this.propriedades.clear();
-    this.addProperty();
+    // Não adicionamos propriedade vazia por padrão para manter o form limpo
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.leadForm.get(fieldName);
+    return !!(field?.invalid && (field?.dirty || field?.touched));
+  }
+
+  isPropertyFieldInvalid(index: number, fieldName: string): boolean {
+    const property = this.propriedades.at(index);
+    const field = property.get(fieldName);
+    return !!(field?.invalid && (field?.dirty || field?.touched));
   }
 
   save() {
     if (this.leadForm.valid) {
-      this.onSave.emit(this.leadForm.value);
-      this.close();
+      this.loading.set(true);
+
+      // Remove formatação de CPF e telefone antes de enviar
+      const formData = {
+        ...this.leadForm.value,
+        cpf: this.leadForm.value.cpf.replace(/\D/g, ""),
+        telefone: this.leadForm.value.telefone.replace(/\D/g, ""),
+      };
+
+      this.onSave.emit(formData);
     } else {
       this.leadForm.markAllAsTouched();
     }
+  }
+
+  resetLoading() {
+    this.loading.set(false);
   }
 }

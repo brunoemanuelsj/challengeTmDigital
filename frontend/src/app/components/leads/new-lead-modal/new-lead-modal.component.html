@@ -1,145 +1,220 @@
 <p-dialog
-  header="Novo Lead"
   [(visible)]="visible"
   [modal]="true"
-  [style]="{ width: '96vw' }"
+  [style]="{ width: '900px', maxWidth: '95vw' }"
   [draggable]="false"
   [resizable]="false"
   (onHide)="close()"
+  header=" "
+  styleClass="custom-modal"
 >
-  <form [formGroup]="leadForm">
-    <div class="field-group">
-      <h3>Dados do Lead</h3>
+  <ng-template pTemplate="header">
+    <div style="display: flex; align-items: center; gap: 0.5rem">
+      <i class="pi pi-user-plus text-primary text-xl"></i>
+      <span class="font-bold text-xl">Novo Lead</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="leadForm" class="mt-2">
+    <!-- Seção: Dados do Lead -->
+    <div class="mb-4">
+      <h3 class="section-title">
+        <i class="pi pi-id-card"></i>
+        Dados Pessoais
+      </h3>
+
       <div class="form-grid">
         <div class="field col-6">
-          <label for="nome">Nome</label>
-          <input pInputText id="nome" formControlName="nome" />
-          <small
-            class="p-error"
-            *ngIf="leadForm.get('nome')?.invalid && leadForm.get('nome')?.touched"
-            >Nome é obrigatório.</small
-          >
+          <label for="nome" class="required">Nome Completo</label>
+          <input
+            pInputText
+            id="nome"
+            formControlName="nome"
+            placeholder="Ex: João da Silva"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('nome') }"
+          />
+          <div class="error-message" *ngIf="isFieldInvalid('nome')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Nome é obrigatório</span>
+          </div>
         </div>
+
         <div class="field col-6">
-          <label for="cpf">CPF</label>
-          <input pInputText id="cpf" formControlName="cpf" />
-          <small
-            class="p-error"
-            *ngIf="leadForm.get('cpf')?.invalid && leadForm.get('cpf')?.touched"
-            >CPF é obrigatório.</small
-          >
+          <label for="cpf" class="required">CPF</label>
+          <input
+            pInputText
+            id="cpf"
+            formControlName="cpf"
+            placeholder="000.000.000-00"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('cpf') }"
+          />
+          <div class="error-message" *ngIf="isFieldInvalid('cpf')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>CPF é obrigatório</span>
+          </div>
         </div>
+
         <div class="field col-6">
-          <label for="email">Email</label>
-          <input pInputText id="email" formControlName="email" />
-          <small
-            class="p-error"
-            *ngIf="leadForm.get('email')?.invalid && leadForm.get('email')?.touched"
-            >Email inválido.</small
-          >
+          <label for="email" class="required">Email</label>
+          <input
+            pInputText
+            id="email"
+            formControlName="email"
+            placeholder="exemplo@email.com"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('email') }"
+          />
+          <div class="error-message" *ngIf="isFieldInvalid('email')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Email inválido ou obrigatório</span>
+          </div>
         </div>
+
         <div class="field col-6">
-          <label for="telefone">Telefone</label>
-          <input pInputText id="telefone" formControlName="telefone" />
-          <small
-            class="p-error"
-            *ngIf="leadForm.get('telefone')?.invalid && leadForm.get('telefone')?.touched"
-            >Telefone é obrigatório.</small
-          >
+          <label for="telefone" class="required">Telefone</label>
+          <input
+            pInputText
+            id="telefone"
+            formControlName="telefone"
+            placeholder="(00) 00000-0000"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('telefone') }"
+          />
+          <div class="error-message" *ngIf="isFieldInvalid('telefone')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Telefone é obrigatório</span>
+          </div>
         </div>
-        <div class="field col-6">
-          <label for="status">Status</label>
-          <input pInputText id="status" formControlName="status" />
-        </div>
+
         <div class="field col-12">
-          <label for="comentarios">Comentários</label>
+          <label for="comentarios">Observações</label>
           <textarea
             pTextarea
             id="comentarios"
             formControlName="comentarios"
             rows="3"
-            style="width: 100%"
+            placeholder="Adicione informações relevantes sobre o lead..."
           ></textarea>
         </div>
       </div>
     </div>
 
-    <div class="field-group">
-      <div class="section-header">
-        <h3>Propriedades Rurais</h3>
+    <!-- Seção: Propriedades Rurais -->
+    <div class="properties-section">
+      <div class="properties-header">
+        <h3 class="section-title mb-0">
+          <i class="pi pi-map"></i>
+          Propriedades Rurais
+        </h3>
         <p-button
           label="Adicionar Propriedade"
           icon="pi pi-plus"
-          styleClass="p-button-sm p-button-outlined"
+          size="small"
+          [outlined]="true"
           (onClick)="addProperty()"
         ></p-button>
       </div>
 
       <div formArrayName="propriedades">
+        <!-- Empty State -->
+        <div *ngIf="propriedades.length === 0" class="empty-state">
+          <i class="pi pi-home"></i>
+          <p>Nenhuma propriedade adicionada.</p>
+          <small>Clique em "Adicionar Propriedade" para incluir áreas rurais.</small>
+        </div>
+
+        <!-- Lista de Propriedades -->
         <div
           *ngFor="let prop of propriedades.controls; let i = index"
           [formGroupName]="i"
           class="property-card"
         >
-          <div class="property-header">
-            <h4>Propriedade {{ i + 1 }}</h4>
+          <div class="card-header">
+            <span class="card-title">Propriedade #{{ i + 1 }}</span>
             <p-button
               icon="pi pi-trash"
-              styleClass="p-button-danger p-button-text p-button-sm"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              pTooltip="Remover propriedade"
               (onClick)="removeProperty(i)"
-              *ngIf="propriedades.length > 0"
             ></p-button>
           </div>
 
-          <div class="form-grid">
+          <div class="form-grid mb-0">
             <div class="field col-6">
-              <label [for]="'prop_nome_' + i">Nome da Propriedade</label>
-              <input pInputText [id]="'prop_nome_' + i" formControlName="nome" />
-              <small class="p-error" *ngIf="prop.get('nome')?.invalid && prop.get('nome')?.touched"
-                >Nome é obrigatório.</small
-              >
+              <label [for]="'prop_nome_' + i" class="required">Nome da Propriedade</label>
+              <input
+                pInputText
+                [id]="'prop_nome_' + i"
+                formControlName="nome"
+                placeholder="Ex: Fazenda Santa Luzia"
+                [ngClass]="{ 'ng-invalid ng-dirty': isPropertyFieldInvalid(i, 'nome') }"
+              />
+              <div class="error-message" *ngIf="isPropertyFieldInvalid(i, 'nome')">
+                <i class="pi pi-exclamation-circle"></i>
+                <span>Nome obrigatório</span>
+              </div>
             </div>
+
             <div class="field col-6">
-              <label [for]="'prop_cultura_' + i">Cultura</label>
-              <input pInputText [id]="'prop_cultura_' + i" formControlName="cultura" />
-              <small
-                class="p-error"
-                *ngIf="prop.get('cultura')?.invalid && prop.get('cultura')?.touched"
-                >Cultura é obrigatória.</small
-              >
+              <label [for]="'prop_cultura_' + i" class="required">Cultura Principal</label>
+              <input
+                pInputText
+                [id]="'prop_cultura_' + i"
+                formControlName="cultura"
+                placeholder="Ex: Soja, Milho, Café"
+                [ngClass]="{ 'ng-invalid ng-dirty': isPropertyFieldInvalid(i, 'cultura') }"
+              />
+              <div class="error-message" *ngIf="isPropertyFieldInvalid(i, 'cultura')">
+                <i class="pi pi-exclamation-circle"></i>
+                <span>Cultura obrigatória</span>
+              </div>
             </div>
+
             <div class="field col-4">
-              <label [for]="'prop_area_' + i">Área (Hectares)</label>
+              <label [for]="'prop_area_' + i" class="required">Área (ha)</label>
               <p-inputNumber
                 [id]="'prop_area_' + i"
                 formControlName="area_hectares"
                 mode="decimal"
                 [minFractionDigits]="2"
-                styleClass="w-full"
+                [maxFractionDigits]="2"
+                placeholder="0,00"
+                [ngClass]="{ 'ng-invalid ng-dirty': isPropertyFieldInvalid(i, 'area_hectares') }"
               ></p-inputNumber>
-              <small
-                class="p-error"
-                *ngIf="prop.get('area_hectares')?.invalid && prop.get('area_hectares')?.touched"
-                >Área é obrigatória.</small
-              >
+              <div class="error-message" *ngIf="isPropertyFieldInvalid(i, 'area_hectares')">
+                <i class="pi pi-exclamation-circle"></i>
+                <span>Área obrigatória</span>
+              </div>
             </div>
+
             <div class="field col-4">
-              <label [for]="'prop_municipio_' + i">Município</label>
-              <input pInputText [id]="'prop_municipio_' + i" formControlName="municipio" />
-              <small
-                class="p-error"
-                *ngIf="prop.get('municipio')?.invalid && prop.get('municipio')?.touched"
-                >Município é obrigatório.</small
-              >
+              <label [for]="'prop_municipio_' + i" class="required">Município</label>
+              <input
+                pInputText
+                [id]="'prop_municipio_' + i"
+                formControlName="municipio"
+                [ngClass]="{ 'ng-invalid ng-dirty': isPropertyFieldInvalid(i, 'municipio') }"
+              />
+              <div class="error-message" *ngIf="isPropertyFieldInvalid(i, 'municipio')">
+                <i class="pi pi-exclamation-circle"></i>
+                <span>Município obrigatório</span>
+              </div>
             </div>
+
             <div class="field col-4">
-              <label [for]="'prop_estado_' + i">Estado</label>
-              <input pInputText [id]="'prop_estado_' + i" formControlName="estado" />
-              <small
-                class="p-error"
-                *ngIf="prop.get('estado')?.invalid && prop.get('estado')?.touched"
-                >Estado é obrigatório.</small
-              >
+              <label [for]="'prop_estado_' + i" class="required">Estado (UF)</label>
+              <input
+                pInputText
+                [id]="'prop_estado_' + i"
+                formControlName="estado"
+                placeholder="UF"
+                maxlength="2"
+                [ngClass]="{ 'ng-invalid ng-dirty': isPropertyFieldInvalid(i, 'estado') }"
+              />
+              <div class="error-message" *ngIf="isPropertyFieldInvalid(i, 'estado')">
+                <i class="pi pi-exclamation-circle"></i>
+                <span>Estado obrigatório</span>
+              </div>
             </div>
           </div>
         </div>
@@ -148,12 +223,22 @@
   </form>
 
   <ng-template pTemplate="footer">
-    <p-button
-      label="Cancelar"
-      icon="pi pi-times"
-      styleClass="p-button-text"
-      (onClick)="close()"
-    ></p-button>
-    <p-button label="Salvar" icon="pi pi-check" (onClick)="save()"></p-button>
+    <div class="flex justify-content-end gap-2 pt-3">
+      <p-button
+        label="Cancelar"
+        icon="pi pi-times"
+        [text]="true"
+        severity="secondary"
+        (onClick)="close()"
+        [disabled]="loading()"
+      ></p-button>
+      <p-button
+        label="Salvar Lead"
+        icon="pi pi-check"
+        (onClick)="save()"
+        [loading]="loading()"
+        [disabled]="loading()"
+      ></p-button>
+    </div>
   </ng-template>
 </p-dialog>
