@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, EventEmitter, Input, Output, signal } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from "@angular/core";
 import {
   FormArray,
   FormBuilder,
@@ -30,24 +30,127 @@ import { TooltipModule } from "primeng/tooltip";
   templateUrl: "./new-lead-modal.component.html",
   styleUrls: ["./new-lead-modal.component.css"],
 })
-export class NewLeadModalComponent {
+export class NewLeadModalComponent implements OnChanges {
   @Input() visible: boolean = false;
+  @Input() lead: any = null;
+  @Input() isEditMode: boolean = false;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() onSave = new EventEmitter<any>();
 
   leadForm!: FormGroup;
   loading = signal<boolean>(false);
 
+  statusOptions = [
+    { label: 'Novo', value: 'novo' },
+    { label: 'Contato Inicial', value: 'contato_inicial' },
+    { label: 'Em Negociação', value: 'em_negociacao' },
+    { label: 'Convertido', value: 'convertido' },
+    { label: 'Perdido', value: 'perdido' },
+  ];
+
   constructor(private fb: FormBuilder) {
     this.initForm();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // Detecta mudanças no lead ou no modo de edição
+    if (changes['lead'] || changes['isEditMode']) {
+      if (this.isEditMode && this.lead) {
+        this.populateForm();
+      } else if (!this.isEditMode) {
+        // Modo de criação - limpa o formulário
+        this.leadForm.reset({ status: "novo" });
+        this.propriedades.clear();
+      }
+    }
+  }
+
+  private populateForm() {
+    if (this.lead) {
+      this.leadForm.patchValue({
+        nome: this.lead.nome,
+        cpf: this.formatCpf(this.lead.cpf),
+        email: this.lead.email,
+        telefone: this.formatTelefone(this.lead.telefone),
+        status: this.lead.status,
+        comentarios: this.lead.comentarios,
+      });
+    }
+  }
+
+  private formatCpf(cpf: string): string {
+    if (!cpf) return '';
+    const numbers = cpf.replace(/\D/g, '');
+    if (numbers.length !== 11) return cpf;
+    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  }
+
+  private formatTelefone(telefone: string): string {
+    if (!telefone) return '';
+    const numbers = telefone.replace(/\D/g, '');
+    if (numbers.length === 11) {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (numbers.length === 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return telefone;
+  }
+
+  // Validador customizado de CPF
+  private cpfValidator(control: any) {
+    const cpf = control.value?.replace(/\D/g, '');
+    if (!cpf || cpf.length !== 11) return { cpfInvalido: true };
+
+    // Verifica se todos os dígitos são iguais
+    if (/^(\d)\1{10}$/.test(cpf)) return { cpfInvalido: true };
+
+    return null;
+  }
+
+  // Aplica máscara de CPF em tempo real
+  onCpfInput(event: any) {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+
+    if (value.length <= 11) {
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
+
+    this.leadForm.patchValue({ cpf: value }, { emitEvent: false });
+  }
+
+  // Aplica máscara de telefone em tempo real
+  onTelefoneInput(event: any) {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+
+    if (value.length <= 11) {
+      if (value.length > 6) {
+        if (value.length === 11) {
+          value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (value.length === 10) {
+          value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        } else {
+          value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+        }
+      } else if (value.length > 2) {
+        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      } else if (value.length > 0) {
+        value = value.replace(/(\d{0,2})/, '($1');
+      }
+    }
+
+    this.leadForm.patchValue({ telefone: value }, { emitEvent: false });
+  }
+
   private initForm() {
     this.leadForm = this.fb.group({
-      nome: ["", Validators.required],
-      cpf: ["", Validators.required],
+      nome: ["", [Validators.required, Validators.minLength(3)]],
+      cpf: ["", [Validators.required, Validators.minLength(14), this.cpfValidator]],
       email: ["", [Validators.required, Validators.email]],
-      telefone: ["", Validators.required],
+      telefone: ["", [Validators.required, Validators.minLength(14)]],
       status: ["novo", Validators.required],
       comentarios: [""],
       propriedades: this.fb.array([]),
@@ -82,7 +185,7 @@ export class NewLeadModalComponent {
   resetForm() {
     this.leadForm.reset({ status: "novo" });
     this.propriedades.clear();
-    // Não adicionamos propriedade vazia por padrão para manter o form limpo
+    // Não modifica os @Input aqui, pois eles são controlados pelo componente pai
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -107,7 +210,13 @@ export class NewLeadModalComponent {
         telefone: this.leadForm.value.telefone.replace(/\D/g, ""),
       };
 
-      this.onSave.emit(formData);
+      // Se estiver editando, não envia propriedades
+      if (this.isEditMode) {
+        delete formData.propriedades;
+        this.onSave.emit({ id: this.lead.id, data: formData });
+      } else {
+        this.onSave.emit(formData);
+      }
     } else {
       this.leadForm.markAllAsTouched();
     }

@@ -133,5 +133,11 @@
   </p-table>
 </div>
 
-<app-new-lead-modal [(visible)]="showNewLeadModal" (onSave)="onSaveLead($event)">
+<app-new-lead-modal
+  [(visible)]="showNewLeadModal"
+  [lead]="selectedLead"
+  [isEditMode]="isEditMode"
+  (onSave)="onSaveLead($event)"
+  (visibleChange)="showNewLeadModal = $event; !$event && onModalHide()"
+>
 </app-new-lead-modal>

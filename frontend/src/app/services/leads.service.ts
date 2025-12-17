@@ -27,7 +27,11 @@ export class LeadsService {
     return this.http.post<Lead>(`${this.apiUrl}/leads`, leadData);
   }
 
-  deleteLead(id: number): Observable<void> {
+  updateLead(id: string, leadData: any): Observable<Lead> {
+    return this.http.put<Lead>(`${this.apiUrl}/leads/${id}`, leadData);
+  }
+
+  deleteLead(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/leads/${id}`);
   }
 }

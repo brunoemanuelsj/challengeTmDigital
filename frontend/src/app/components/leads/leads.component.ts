@@ -47,9 +47,17 @@ export class LeadsComponent implements OnInit {
   leads = signal<Lead[]>([]);
 
   showNewLeadModal = false;
+  selectedLead: Lead | null = null;
+  isEditMode = false;
 
   ngOnInit() {
     this.loadLeads();
+  }
+
+  onModalHide() {
+    // Reseta o estado quando o modal fecha
+    this.selectedLead = null;
+    this.isEditMode = false;
   }
 
   loadLeads() {
@@ -95,36 +103,67 @@ export class LeadsComponent implements OnInit {
   }
 
   onAdd() {
+    this.selectedLead = null;
+    this.isEditMode = false;
     this.showNewLeadModal = true;
   }
 
   onSaveLead(leadData: any) {
-    this.leadsService.createLead(leadData).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: "success",
-          summary: "Sucesso",
-          detail: "Lead criado com sucesso!",
-          life: 3000,
-        });
-        this.modal?.close();
-        this.loadLeads();
-      },
-      error: (error) => {
-        console.error("Erro ao criar lead:", error);
-        this.messageService.add({
-          severity: "error",
-          summary: "Erro",
-          detail: error.error?.message || "Erro ao criar lead. Tente novamente.",
-          life: 5000,
-        });
-        this.modal?.resetLoading();
-      },
-    });
+    if (this.isEditMode && leadData.id) {
+      // Atualizar lead existente
+      this.leadsService.updateLead(leadData.id, leadData.data).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: "success",
+            summary: "Sucesso",
+            detail: "Lead atualizado com sucesso!",
+            life: 3000,
+          });
+          this.modal?.close();
+          this.loadLeads();
+        },
+        error: (error) => {
+          console.error("Erro ao atualizar lead:", error);
+          this.messageService.add({
+            severity: "error",
+            summary: "Erro",
+            detail: error.error?.message || "Erro ao atualizar lead. Tente novamente.",
+            life: 5000,
+          });
+          this.modal?.resetLoading();
+        },
+      });
+    } else {
+      // Criar novo lead
+      this.leadsService.createLead(leadData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: "success",
+            summary: "Sucesso",
+            detail: "Lead criado com sucesso!",
+            life: 3000,
+          });
+          this.modal?.close();
+          this.loadLeads();
+        },
+        error: (error) => {
+          console.error("Erro ao criar lead:", error);
+          this.messageService.add({
+            severity: "error",
+            summary: "Erro",
+            detail: error.error?.message || "Erro ao criar lead. Tente novamente.",
+            life: 5000,
+          });
+          this.modal?.resetLoading();
+        },
+      });
+    }
   }
 
-  onEdit(lead: any) {
-    console.log("Editar lead", lead);
+  onEdit(lead: Lead) {
+    this.selectedLead = lead;
+    this.isEditMode = true;
+    this.showNewLeadModal = true;
   }
 
   onDelete(lead: Lead) {

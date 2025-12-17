@@ -10,8 +10,12 @@
 >
   <ng-template pTemplate="header">
     <div style="display: flex; align-items: center; gap: 0.5rem">
-      <i class="pi pi-user-plus text-primary text-xl"></i>
-      <span class="font-bold text-xl">Novo Lead</span>
+      <i
+        [class]="
+          isEditMode ? 'pi pi-pencil text-primary text-xl' : 'pi pi-user-plus text-primary text-xl'
+        "
+      ></i>
+      <span class="font-bold text-xl">{{ isEditMode ? 'Editar Lead' : 'Novo Lead' }}</span>
     </div>
   </ng-template>
 
@@ -46,11 +50,15 @@
             id="cpf"
             formControlName="cpf"
             placeholder="000.000.000-00"
+            maxlength="14"
+            (input)="onCpfInput($event)"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('cpf') }"
           />
           <div class="error-message" *ngIf="isFieldInvalid('cpf')">
             <i class="pi pi-exclamation-circle"></i>
-            <span>CPF é obrigatório</span>
+            <span *ngIf="leadForm.get('cpf')?.errors?.['required']">CPF é obrigatório</span>
+            <span *ngIf="leadForm.get('cpf')?.errors?.['cpfInvalido']">CPF inválido</span>
+            <span *ngIf="leadForm.get('cpf')?.errors?.['minlength']">CPF deve ter 11 dígitos</span>
           </div>
         </div>
 
@@ -76,11 +84,34 @@
             id="telefone"
             formControlName="telefone"
             placeholder="(00) 00000-0000"
+            maxlength="15"
+            (input)="onTelefoneInput($event)"
             [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('telefone') }"
           />
           <div class="error-message" *ngIf="isFieldInvalid('telefone')">
             <i class="pi pi-exclamation-circle"></i>
-            <span>Telefone é obrigatório</span>
+            <span *ngIf="leadForm.get('telefone')?.errors?.['required']"
+              >Telefone é obrigatório</span
+            >
+            <span *ngIf="leadForm.get('telefone')?.errors?.['minlength']">Telefone inválido</span>
+          </div>
+        </div>
+
+        <div class="field col-6">
+          <label for="status" class="required">Status</label>
+          <select
+            id="status"
+            formControlName="status"
+            class="p-inputtext p-component w-full"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('status') }"
+          >
+            <option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <div class="error-message" *ngIf="isFieldInvalid('status')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Status é obrigatório</span>
           </div>
         </div>
 
@@ -98,7 +129,7 @@
     </div>
 
     <!-- Seção: Propriedades Rurais -->
-    <div class="properties-section">
+    <div class="properties-section" *ngIf="!isEditMode">
       <div class="properties-header">
         <h3 class="section-title mb-0">
           <i class="pi pi-map"></i>
@@ -233,7 +264,7 @@
         [disabled]="loading()"
       ></p-button>
       <p-button
-        label="Salvar Lead"
+        [label]="isEditMode ? 'Atualizar Lead' : 'Salvar Lead'"
         icon="pi pi-check"
         (onClick)="save()"
         [loading]="loading()"

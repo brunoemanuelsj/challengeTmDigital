@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { DataSource } from "typeorm";
 import { CreateLeadDto } from "./dto/create-lead.dto";
+import { UpdateLeadDto } from "./dto/update-lead.dto";
 import { Lead } from "./lead.entity";
 
 type LeadWithArea = Lead & { total_area: number };
@@ -65,6 +66,65 @@ export class LeadsService {
 
       await queryRunner.commitTransaction();
       return lead;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async update(id: string, updateLeadDto: UpdateLeadDto): Promise<Lead> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Construir query de atualização dinamicamente
+      const fields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      if (updateLeadDto.nome !== undefined) {
+        fields.push(`nome = $${paramIndex++}`);
+        values.push(updateLeadDto.nome);
+      }
+      if (updateLeadDto.cpf !== undefined) {
+        fields.push(`cpf = $${paramIndex++}`);
+        values.push(updateLeadDto.cpf);
+      }
+      if (updateLeadDto.email !== undefined) {
+        fields.push(`email = $${paramIndex++}`);
+        values.push(updateLeadDto.email);
+      }
+      if (updateLeadDto.telefone !== undefined) {
+        fields.push(`telefone = $${paramIndex++}`);
+        values.push(updateLeadDto.telefone);
+      }
+      if (updateLeadDto.status !== undefined) {
+        fields.push(`status = $${paramIndex++}`);
+        values.push(updateLeadDto.status);
+      }
+      if (updateLeadDto.comentarios !== undefined) {
+        fields.push(`comentarios = $${paramIndex++}`);
+        values.push(updateLeadDto.comentarios);
+      }
+
+      // Atualizar updated_at
+      fields.push(`updated_at = CURRENT_TIMESTAMP`);
+      values.push(id);
+
+      const updateQuery = `
+        UPDATE leads 
+        SET ${fields.join(', ')} 
+        WHERE id = $${paramIndex}
+        RETURNING *
+      `;
+
+      const result = await queryRunner.query(updateQuery, values);
+
+      await queryRunner.commitTransaction();
+      return result[0];
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
