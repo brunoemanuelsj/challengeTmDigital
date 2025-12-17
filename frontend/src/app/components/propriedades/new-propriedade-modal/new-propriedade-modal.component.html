@@ -1,0 +1,148 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '700px', maxWidth: '95vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="close()"
+  header=" "
+  styleClass="custom-modal"
+>
+  <ng-template pTemplate="header">
+    <div style="display: flex; align-items: center; gap: 0.5rem">
+      <i
+        [class]="
+          isEditMode ? 'pi pi-pencil text-primary text-xl' : 'pi pi-map-marker text-primary text-xl'
+        "
+      ></i>
+      <span class="font-bold text-xl">{{
+        isEditMode ? 'Editar Propriedade' : 'Nova Propriedade'
+      }}</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="propriedadeForm" class="mt-2">
+    <!-- Seção: Dados da Propriedade -->
+    <div class="mb-4">
+      <h3 class="section-title">
+        <i class="pi pi-home"></i>
+        Dados da Propriedade
+      </h3>
+
+      <div class="form-grid">
+        <div class="field col-6">
+          <label for="nome" class="required">Nome da Propriedade</label>
+          <input
+            pInputText
+            id="nome"
+            formControlName="nome"
+            placeholder="Ex: Fazenda São João"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('nome') }"
+          />
+          <div class="error-message" *ngIf="isFieldInvalid('nome')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Nome é obrigatório</span>
+          </div>
+        </div>
+
+        <div class="field col-6">
+          <label for="lead_id" class="required">Lead ID</label>
+          <input
+            pInputText
+            id="lead_id"
+            formControlName="lead_id"
+            placeholder="ID do lead"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('lead_id') }"
+          />
+          <div class="error-message" *ngIf="isFieldInvalid('lead_id')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Lead ID é obrigatório</span>
+          </div>
+        </div>
+
+        <div class="field col-6">
+          <label for="cultura">Cultura</label>
+          <input
+            pInputText
+            id="cultura"
+            formControlName="cultura"
+            placeholder="Ex: Soja, Milho, Café"
+          />
+        </div>
+
+        <div class="field col-6">
+          <label for="area_hectares" class="required">Área (hectares)</label>
+          <p-inputNumber
+            inputId="area_hectares"
+            formControlName="area_hectares"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0.01"
+            placeholder="Ex: 150.50"
+            styleClass="w-full"
+            [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('area_hectares') }"
+          ></p-inputNumber>
+          <div class="error-message" *ngIf="isFieldInvalid('area_hectares')">
+            <i class="pi pi-exclamation-circle"></i>
+            <span>Área é obrigatória</span>
+          </div>
+        </div>
+
+        <div class="field col-6">
+          <label for="municipio">Município</label>
+          <input
+            pInputText
+            id="municipio"
+            formControlName="municipio"
+            placeholder="Ex: Ribeirão Preto"
+          />
+        </div>
+
+        <div class="field col-6">
+          <label for="estado">Estado</label>
+          <select id="estado" formControlName="estado" class="form-select">
+            <option value="">Selecione um estado</option>
+            @for (estado of estadosOptions; track estado.value) {
+            <option [value]="estado.value">{{ estado.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field col-12">
+          <label for="geometria_wkt">Geometria (WKT)</label>
+          <textarea
+            id="geometria_wkt"
+            formControlName="geometria_wkt"
+            placeholder="Ex: POLYGON((-47.8 -21.2, -47.8 -21.1, -47.7 -21.1, -47.7 -21.2, -47.8 -21.2))"
+            rows="3"
+            class="form-textarea"
+          ></textarea>
+          <small class="geometria-hint">
+            <i class="pi pi-info-circle"></i>
+            Opcional: Insira a geometria no formato WKT (Well-Known Text)
+          </small>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="modal-footer">
+      <p-button
+        label="Cancelar"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="close()"
+        [disabled]="loading()"
+      ></p-button>
+      <p-button
+        [label]="isEditMode ? 'Atualizar' : 'Criar'"
+        icon="pi pi-check"
+        [loading]="loading()"
+        (onClick)="save()"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
