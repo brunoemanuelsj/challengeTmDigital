@@ -22,6 +22,16 @@ cd challengeTmDigital
 # Navegar para a pasta do backend
 cd backend
 
+# Criar arquivo .env com as configurações do banco de dados
+# Crie um arquivo chamado .env na pasta backend com o seguinte conteúdo:
+# NODE_ENV=development
+# PORT=3000
+# DB_HOST=localhost
+# DB_PORT=5433
+# DB_USER=postgres
+# DB_PASSWORD=postgres
+# DB_NAME=nestjs_db
+
 # Instalar dependências
 npm install
 
