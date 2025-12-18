@@ -26,4 +26,9 @@ export class LeadsController {
   async delete(@Param("id") id: string) {
     return await this.leadsService.delete(id);
   }
+
+  @Get("statistics/dashboard")
+  async getDashboardStatistics() {
+    return await this.leadsService.getDashboardStatistics();
+  }
 }

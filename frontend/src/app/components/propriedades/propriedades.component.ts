@@ -50,7 +50,12 @@ export class PropriedadesComponent implements OnInit {
     this.loading.set(true);
     this.propriedadesService.getPropriedades().subscribe({
       next: (data) => {
-        this.propriedades.set(data);
+        // Garantir que `area_hectares` seja number para ordenação correta
+        const normalized = data.map((p: Propriedade) => ({
+          ...p,
+          area_hectares: p.area_hectares !== null && p.area_hectares !== undefined ? Number(p.area_hectares) : p.area_hectares,
+        }));
+        this.propriedades.set(normalized);
         this.loading.set(false);
       },
       error: (error) => {

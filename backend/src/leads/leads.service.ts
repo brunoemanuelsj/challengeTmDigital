@@ -159,4 +159,79 @@ export class LeadsService {
       await queryRunner.release();
     }
   }
+
+  async getDashboardStatistics() {
+    // Total de leads
+    const totalLeadsResult = await this.dataSource.query(
+      'SELECT COUNT(*) as total FROM leads'
+    );
+    const totalLeads = parseInt(totalLeadsResult[0].total);
+
+    // Leads por status
+    const leadsByStatus = await this.dataSource.query(`
+      SELECT status, COUNT(*) as count
+      FROM leads
+      GROUP BY status
+      ORDER BY count DESC
+    `);
+
+    // Leads por município (top 10)
+    const leadsByMunicipio = await this.dataSource.query(`
+      SELECT p.municipio, COUNT(DISTINCT l.id) as count
+      FROM leads l
+      INNER JOIN propriedades_rurais p ON l.id = p.lead_id
+      WHERE p.municipio IS NOT NULL AND p.municipio != ''
+      GROUP BY p.municipio
+      ORDER BY count DESC
+      LIMIT 10
+    `);
+
+    // Leads prioritários (área total > 100 hectares)
+    const priorityLeads = await this.dataSource.query(`
+      SELECT 
+        l.id,
+        l.nome,
+        l.cpf,
+        l.status,
+        SUM(p.area_hectares) as total_area
+      FROM leads l
+      INNER JOIN propriedades_rurais p ON l.id = p.lead_id
+      GROUP BY l.id, l.nome, l.cpf, l.status
+      HAVING SUM(p.area_hectares) > 100
+      ORDER BY total_area DESC
+    `);
+
+    // Estatísticas de propriedades
+    const propertyStats = await this.dataSource.query(`
+      SELECT 
+        COUNT(*) as total_propriedades,
+        SUM(area_hectares) as area_total,
+        AVG(area_hectares) as area_media
+      FROM propriedades_rurais
+    `);
+
+    return {
+      totalLeads,
+      leadsByStatus: leadsByStatus.map(row => ({
+        status: row.status,
+        count: parseInt(row.count)
+      })),
+      leadsByMunicipio: leadsByMunicipio.map(row => ({
+        municipio: row.municipio,
+        count: parseInt(row.count)
+      })),
+      priorityLeads: priorityLeads.map(row => ({
+        id: row.id,
+        nome: row.nome,
+        cpf: row.cpf,
+        status: row.status,
+        totalArea: parseFloat(row.total_area)
+      })),
+      propertyStats: {
+        totalPropriedades: parseInt(propertyStats[0].total_propriedades),
+        areaTotal: parseFloat(propertyStats[0].area_total || 0),
+        areaMedia: parseFloat(propertyStats[0].area_media || 0)
+      }
+    };
+  }
 }
